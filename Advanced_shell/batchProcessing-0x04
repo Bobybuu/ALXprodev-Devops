@@ -9,7 +9,7 @@ LOG_FILE="pokemon_fetch_errors.log"
 : > "$LOG_FILE"   # clear previous logs
 
 # List of Pokémon to fetch
-POKEMONS=("gari" "bulbasaur" "ivysaur" "venusaur" "charmander" "charmeleon")
+POKEMONS=("bulbasaur" "ivysaur" "venusaur" "charmander" "charmeleon")
 
 # Function to fetch one Pokémon
 fetch_pokemon() {
@@ -35,8 +35,15 @@ for pokemon in "${POKEMONS[@]}"; do
     fetch_pokemon "$pokemon" &
 done
 
+# Show running background jobs
+echo "Currently running background jobs:"
+jobs -l
+
 # Wait for all background processes to finish
 wait
+
+# Clean up any stray jobs (just in case)
+jobs -p | xargs -r kill
 
 echo "✅ All Pokémon data fetched. Errors (if any) are logged in $LOG_FILE"
 
