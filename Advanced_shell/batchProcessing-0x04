@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Directory to store results
+OUTPUT_DIR="pokemon_data"
+mkdir -p "$OUTPUT_DIR"
+
+# Log file for errors
+LOG_FILE="pokemon_fetch_errors.log"
+: > "$LOG_FILE"   # clear previous logs
+
+# List of Pokémon to fetch
+POKEMONS=("gari" "bulbasaur" "ivysaur" "venusaur" "charmander" "charmeleon")
+
+# Function to fetch one Pokémon
+fetch_pokemon() {
+    local pokemon=$1
+    local response
+    local status_code
+
+    echo "Fetching data for $pokemon..."
+
+    response=$(curl -s -w "%{http_code}" -o "$OUTPUT_DIR/$pokemon.json" "https://pokeapi.co/api/v2/pokemon/$pokemon")
+    status_code=$(tail -n1 <<< "$response")
+
+    if [ "$status_code" -eq 200 ]; then
+        echo "Saved data to $OUTPUT_DIR/$pokemon.json ✅"
+    else
+        echo "❌ Failed to fetch $pokemon (HTTP $status_code)" | tee -a "$LOG_FILE"
+        rm -f "$OUTPUT_DIR/$pokemon.json"
+    fi
+}
+
+# Launch all fetches in parallel
+for pokemon in "${POKEMONS[@]}"; do
+    fetch_pokemon "$pokemon" &
+done
+
+# Wait for all background processes to finish
+wait
+
+echo "✅ All Pokémon data fetched. Errors (if any) are logged in $LOG_FILE"
+
