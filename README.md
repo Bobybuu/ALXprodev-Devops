@@ -1,6 +1,3 @@
----
-
-```markdown
 # Advanced Shell Scripting – Pokémon API Automation
 
 ## 📌 Project Overview & Summary
@@ -148,10 +145,4 @@ chmod +x apiAutomation-0x00 data_extraction_automation-0x01 batchProcessing-0x02
 👤 **Chrispin Odiwuor**
 
 * Software Engineering | DevOps | AWS Cloud Computing
-* [LinkedIn](https://www.linkedin.com/) | [GitHub](https://github.com/)
-
----
-
-```
-
----
+* [LinkedIn](https://www.linkedin.com/) | [GitHub](https://github)
