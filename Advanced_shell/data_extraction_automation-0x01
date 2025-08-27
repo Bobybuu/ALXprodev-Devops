@@ -12,4 +12,8 @@ formatted_height=$(awk "BEGIN {print $height/10}")
 # Weight in hectograms -> kilograms
 formatted_weight=$(awk "BEGIN {print $weight/10}")
 
+# Use sed to capitalize the first letter of name and type
+name=$(echo "$name" | sed 's/.*/\u&/')
+type=$(echo "$type" | sed 's/.*/\u&/')
+
 echo "$name is of type $type, weighs ${formatted_weight}kg, and is ${formatted_height}m tall."
