@@ -1,0 +1,18 @@
+#!/bin/bash
+
+API_URL="https://pokeapi.co/api/v2/pokemon/"
+OUTPUT_FILE="data.json"
+ERROR_FILE="errors.txt"
+
+curl -s -o "OUTPUT_FILE" -w "%{http_code}" "$API_URL" > status_code.txt
+
+STATUS_CODE=$(cat status_code.txt)
+rm -f status_code.txt
+
+if [ "$STATUS_CODE" -eq 200 ]; then
+	echo "Data successfully saved to $OUTPUT_FILE"
+else
+	echo "Error fetching data (status code: $STATUS_CODE)" | tee -a "$ERROR_FILE"
+	rm -f "$OUTPUT_FILE"
+fi
+
