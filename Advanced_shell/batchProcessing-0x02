@@ -1,27 +1,54 @@
 #!/bin/bash
 
-# Directory where data will be stored
+# Directory to store results
 OUTPUT_DIR="pokemon_data"
 mkdir -p "$OUTPUT_DIR"
+
+# Log file for errors
+LOG_FILE="pokemon_fetch_errors.log"
+: > "$LOG_FILE"   # clear previous logs
 
 # List of Pokémon to fetch
 POKEMONS=("bulbasaur" "ivysaur" "venusaur" "charmander" "charmeleon" "opuk")
 
-# Loop through each Pokémon in the list
-for pokemon in "${POKEMONS[@]}"; do
+# Function to fetch Pokémon with retry logic
+fetch_pokemon() {
+    local pokemon=$1
+    local retries=0
+    local max_retries=3
+    local success=false
+
     echo "Fetching data for $pokemon..."
-    
-    # Make API request and save response
-    response=$(curl -s -w "%{http_code}" -o "$OUTPUT_DIR/$pokemon.json" "https://pokeapi.co/api/v2/pokemon/$pokemon")
-    
-    # Check if request was successful
-    if [ "$response" -eq 200 ]; then
-        echo "Saved data to $OUTPUT_DIR/$pokemon.json ✅"
-    else
-        echo "Failed to fetch data for $pokemon ❌ (status code: $response)" >> errors.txt
-        rm -f "$OUTPUT_DIR/$pokemon.json"  # remove incomplete file
+
+    while [ $retries -lt $max_retries ]; do
+        response=$(curl -s -w "%{http_code}" -o "$OUTPUT_DIR/$pokemon.json" "https://pokeapi.co/api/v2/pokemon/$pokemon")
+
+        # Extract status code
+        status_code=$(tail -n1 <<< "$response")
+
+        if [ "$status_code" -eq 200 ]; then
+            echo "Saved data to $OUTPUT_DIR/$pokemon.json ✅"
+            success=true
+            break
+        else
+            echo "Attempt $((retries+1)) failed for $pokemon (HTTP $status_code)"
+            retries=$((retries+1))
+            sleep 2
+        fi
+    done
+
+    if [ "$success" = false ]; then
+        echo "❌ Failed to fetch data for $pokemon after $max_retries attempts" | tee -a "$LOG_FILE"
+        # Remove incomplete file if created
+        rm -f "$OUTPUT_DIR/$pokemon.json"
     fi
-    
-    # Add delay to avoid rate limiting
-    sleep 2
-done	
+}
+
+# Main loop
+for pokemon in "${POKEMONS[@]}"; do
+    fetch_pokemon "$pokemon"
+    sleep 2  # Prevent API rate limiting
+done
+
+echo "Done! Errors (if any) are logged in $LOG_FILE"
+
