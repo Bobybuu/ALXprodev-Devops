@@ -2,14 +2,14 @@
 
 INPUT_FILE="data.json"
 
-NAME=$(jq -r '.name' "$INPUT_FILE")
-HEIGHT=$(jq -r '.height' "$INPUT_FILE")
-WEIGHT=$(jq -r '.weight' "$INPUT_FILE")
-TYPE=$(jq -r '.types[0].type.name' "$INPUT_FILE")
+name=$(jq -r '.name' "$INPUT_FILE")
+height=$(jq -r '.height' "$INPUT_FILE")
+weight=$(jq -r '.weight' "$INPUT_FILE")
+type=$(jq -r '.types[0].type.name' "$INPUT_FILE")
 
 # Height in decimetres -> metres
-HEIGHT_METERS=$(awk "BEGIN {print $HEIGHT/10}")
+formatted_height=$(awk "BEGIN {print $height/10}")
 # Weight in hectograms -> kilograms
-WEIGHT_KG=$(awk "BEGIN {print $WEIGHT/10}")
+formatted_weight=$(awk "BEGIN {print $weight/10}")
 
-echo "$(echo "$NAME" | sed 's/.*/\u&/') is of type $(echo "$TYPE" | sed 's/.*/\u&/'), weighs ${WEIGHT_KG}kg, and is ${HEIGHT_METERS}m tall."
+echo "$name is of type $type, weighs ${formatted_weight}kg, and is ${formatted_height}m tall."
